@@ -1,106 +1,96 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import IconImage from "./img/icon.png";
-import KakaoImage from "./img/kakao.png";
-import styled, {createGlobalStyle} from "styled-components";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
+import Logo from "../assets/img/logo.svg"
+import Kakao from "../assets/img/kakao.svg"
 
 const Start = () => {
-  const navigate =useNavigate();
 
-  const handleStart = () =>{
-    navigate("/main");
+  const CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
+  const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+
+  const handleKakaoLogin = () => {
+    const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
+    window.location.href = kakaoLoginUrl;
   };
 
-  
-    return (
-      <>
-      <GlobalStyle />
-      <StartContainer>
-        <Title>냉장고 레시피</Title>
-        <Icon src = {IconImage} alt="냉장고레시피 아이콘"/>
-        <StartButton
-        onClick={handleStart}>시작하기</StartButton>
-        <KakaoButton>
-          <KakaoIcon src= {KakaoImage} alt = "카카오 아이콘" />
-          카카오로 계속하기</KakaoButton>
-      </StartContainer>
-      </>
-    );
-  };
+  return (
+    <Container>
+      <Title>냉장고 레시피</Title>
+      <Image src={Logo} alt="냉장고 이미지" />
 
+      <LinkButton to="/main">시작하기</LinkButton>
 
-  
+      <KakaoButton onClick={handleKakaoLogin}>
+        <img src={Kakao} alt="Kakao Logo" />
+        카카오로 계속하기
+      </KakaoButton>
+    </Container>
+  );
+};
+
 export default Start;
 
-const GlobalStyle = createGlobalStyle`
-*{
-  margin : 0;
-  padding : 0;
-  box-sizing :border-box;
-}`
-
-const StartContainer = styled.div`
+const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #ffffff;
-  padding: 20px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  background-color: #fff;
 `;
 
 const Title = styled.h1`
-  font-size: 24px;
-  color: #333333;
-  margin-bottom: 50px;
-`;
-
-const Icon = styled.img`
-  width: 150px;
-  height: auto;
-  margin-bottom: 80px;
-`;
-
-const StartButton = styled.button`
-  width: 80%;
-  padding: 15px 0;
-  margin-bottom: 10px;
-  background-color: #ffffff;
-  color: #000000;
-  font-size: 16px;
+  font-size: 2rem;
   font-weight: bold;
-  border: 2px solid #dddddd;
-  border-radius: 30px;
+  margin-bottom: 3rem;
+  color: #333;
+`;
+
+const Image = styled.img`
+  width: 150px;
+  height: 200px;
+  margin-bottom: 3rem;
+`;
+
+const LinkButton = styled(Link)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  width: 80%;
+  max-width: 300px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 520;
+  border: none;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
   cursor: pointer;
+  background-color: #f8f8f8;
+  color: #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #f5f5f5;
+    background-color: #f0f0f0;
   }
 `;
 
-const KakaoButton = styled.button`
-  width: 80%;
-  padding: 15px 0;
+const KakaoButton = styled(LinkButton).attrs({ as: "button" })`
   background-color: #fee500;
-  color: #3c1e1e;
-  font-size: 16px;
-  font-weight: bold;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap:10px;
+
+  img {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.5rem;
+  }
 
   &:hover {
-    background-color: #ffd700;
+    background-color: #ffd900;
   }
-`;
-
-const KakaoIcon = styled.img`
-  width: 20px;
-  height: 20px;
 `;
