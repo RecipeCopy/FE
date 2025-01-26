@@ -5,6 +5,7 @@ import NotFound from "./pages/not-found.jsx";
 import MainPage from "./pages/Main.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import StartPage from "./pages/Start.jsx";
+import AddIngredient from "./pages/AddIngredient.jsx";
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
         path: "login",
         element: <SignupPage />,
       },
+      {
+        path : "add",
+        element: <AddIngredient />,
+      }
     ],
   },
 ]);
