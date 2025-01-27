@@ -24,10 +24,3 @@ const MainContainer = styled.div`
   min-height: 100vh;
 `;
 
-const StyledHeader = styled.header`
-  width: 100%;
-  padding: 20px;
-  background-color: #fff;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-`;
