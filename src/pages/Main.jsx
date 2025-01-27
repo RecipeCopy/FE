@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import TabBar from "../components/TabBar";
 import { useNavigate } from "react-router-dom";
@@ -6,21 +6,35 @@ import styled from "styled-components";
 
 const Main = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [nickName, setNickName] = useState("사용자"); // 닉네임 기본값 설정
   const navigate = useNavigate();
 
-  const handleAddIngredient = () =>{
+  // URL 파라미터 또는 sessionStorage에서 닉네임 가져오기
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlNickName = params.get("nickName");
+
+    if (urlNickName) {
+      setNickName(urlNickName);
+      sessionStorage.setItem("nickName", urlNickName); // 닉네임 저장
+    } else {
+      const storedNickName = sessionStorage.getItem("nickName");
+      if (storedNickName) {
+        setNickName(storedNickName);
+      }
+    }
+  }, []);
+
+  const handleAddIngredient = () => {
     navigate("/add");
-
   };
 
-  const handleTakePhoto = () =>{
+  const handleTakePhoto = () => {
     console.log("카메라 연결 실행");
-
   };
-
 
   return (
-    <PageContainer>
+    <>
       <Header onAddClick={() => setIsMenuOpen(!isMenuOpen)} />
       {isMenuOpen && (
         <MenuContainer>
@@ -33,18 +47,21 @@ const Main = () => {
         </MenuContainer>
       )}
       <Content>
-        <EmptyMessage>냉장고가 비었어요!</EmptyMessage>
+        <EmptyMessage>
+          {nickName}님의 <br />
+          냉장고가 비었어요!
+        </EmptyMessage>
       </Content>
       <TabBar />
-    </PageContainer>
+    </>
   );
-  };
-  
+};
+
 export default Main;
 
 const MenuContainer = styled.div`
   position: fixed;
-  top:40px;
+  top: 40px;
   right: 20px;
   background-color: white;
   border-radius: 10px;
@@ -72,9 +89,6 @@ const MenuButton = styled.button`
     color: white;
   }
 `;
-const PageContainer = styled.div`
-  padding: 20px;
-`;
 
 const Content = styled.div`
   margin-top: 20px;
@@ -83,5 +97,7 @@ const Content = styled.div`
 const EmptyMessage = styled.div`
   text-align: center;
   color: #555;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.5;
 `;
-
