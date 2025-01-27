@@ -19,22 +19,25 @@ const Main = () => {
   };
 
 
-    return (
-        <>
-          <Header onAddClick={()=> setIsMenuOpen(!isMenuOpen)}/>
-          {isMenuOpen && (
-         <MenuContainer>
-            <MenuButton onClick={handleAddIngredient}>
+  return (
+    <PageContainer>
+      <Header onAddClick={() => setIsMenuOpen(!isMenuOpen)} />
+      {isMenuOpen && (
+        <MenuContainer>
+          <MenuButton onClick={handleAddIngredient}>
             ➕ 재료 추가하기
           </MenuButton>
           <MenuButton onClick={handleTakePhoto}>
             ➕ 재료 사진찍기
           </MenuButton>
         </MenuContainer>
-          )}
-          <TabBar />
-        </>
-    );
+      )}
+      <Content>
+        <EmptyMessage>냉장고가 비었어요!</EmptyMessage>
+      </Content>
+      <TabBar />
+    </PageContainer>
+  );
   };
   
 export default Main;
@@ -55,7 +58,7 @@ const MenuContainer = styled.div`
 
 const MenuButton = styled.button`
   background-color: #fff;
-  color: balck;
+  color: black;
   font-size: 14px;
   font-weight: bold;
   padding: 10px;
@@ -69,3 +72,16 @@ const MenuButton = styled.button`
     color: white;
   }
 `;
+const PageContainer = styled.div`
+  padding: 20px;
+`;
+
+const Content = styled.div`
+  margin-top: 20px;
+`;
+
+const EmptyMessage = styled.div`
+  text-align: center;
+  color: #555;
+`;
+
