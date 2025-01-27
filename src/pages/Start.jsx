@@ -1,17 +1,43 @@
 import React from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
-import Logo from "../assets/img/logo.svg"
-import Kakao from "../assets/img/kakao.svg"
+import { Link, useNavigate } from "react-router-dom";
+import Logo from "../assets/img/logo.svg";
+import Kakao from "../assets/img/kakao.svg";
 
 const Start = () => {
-
   const CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
   const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+  const navigate = useNavigate();
 
-  const handleKakaoLogin = () => {
+  const handleKakaoLogin = async () => {
     const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
-    window.location.href = kakaoLoginUrl;
+
+    // 카카오 로그인 요청
+    const code = new URLSearchParams(window.location.search).get("code");
+
+    if (!code) {
+      window.location.href = kakaoLoginUrl; // 카카오 인증 URL로 리다이렉트
+    } else {
+      try {
+        const response = await fetch(`/callback?code=${code}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const { nickName } = data;
+
+          // 메인 페이지로 닉네임 전달하며 이동
+          navigate("/main", { state: { nickName } });
+        } else {
+          alert("로그인에 실패했습니다. 다시 시도해주세요.");
+        }
+      } catch (error) {
+        console.error("카카오 로그인 에러:", error);
+        alert("로그인 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (

@@ -1,4 +1,5 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {FiX} from "react-icons/fi";
@@ -7,13 +8,61 @@ import {FiX} from "react-icons/fi";
 const Header = ({onAddClick}) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [userName, setUserName] = useState(""); // 사용자 이름 상태
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태  
+
+    useEffect(() => {
+      const fetchUserInfo = async () => {
+        try {
+          const response = await fetch("http://localhost:8080/api/user", {
+            method: "GET",
+            credentials: "include", // 세션 정보를 포함
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            setUserName(data.nickName);
+            setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(false);
+          }
+        } catch (error) {
+          console.error("Error fetching user info:", error);
+          setIsLoggedIn(false);
+        }
+      };
+  
+      fetchUserInfo();
+    }, []);
+
+    // 로그아웃
+    const handleLogout = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/logout", {
+          method: "POST",
+          credentials: "include", // 세션 정보를 포함
+        });
+
+        if (response.ok) {
+          // 스토리지 데이터 삭제
+          sessionStorage.clear(); // sessionStorage에 저장된 모든 항목 삭제
+          localStorage.removeItem("userName"); // 특정 항목만 삭제
+
+          setIsLoggedIn(false);
+          setUserName("");
+          window.location.href = "/"; // 로그인 페이지로 리다이렉트
+        }
+      } catch (error) {
+        console.error("Error logging out:", error);
+      }
+    };
 
     const headerConfig = {
         "/main":{
             title:"나의 냉장고",
             buttons : [
                 {label:"추가하기",action: onAddClick},
-                {label:"로그인",path:"/login"},
+                { label: isLoggedIn ? "로그아웃" : "로그인", action: isLoggedIn ? handleLogout : null, path: isLoggedIn ? null : "/login" },
             ],
             layout:"space-between",
         },
