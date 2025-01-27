@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import styled from "styled-components";
 import IngredientData from "../components/Ingredients.jsx";
 import Header from "../components/Header.jsx";
-import SearchBar from "../components/SearchBar.jsx";
+
 
 const AddIngredient = ()=>{
      const [selectedIngredients, setSelectedIngredients] = useState([]);
