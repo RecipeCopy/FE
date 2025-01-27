@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
-const Header = () => {
+const Header = ({onAddClick}) => {
     const location = useLocation();
 
     console.log("Current Path:", location.pathname);
@@ -11,7 +11,7 @@ const Header = () => {
         "/main":{
             title:"나의 냉장고",
             buttons : [
-                {label:"추가하기",path :"/add"},
+                {label:"추가하기",action: onAddClick},
                 {label:"로그인",path:"/login"},
             ],
             layout:"space-between",
@@ -40,17 +40,23 @@ const Header = () => {
     const currentConfig = headerConfig[location.pathname] || headerConfig.default;
 
     return (
-        <HeaderContainer layout={currentConfig.layout}>
-          <Title>{currentConfig.title}</Title>
-          <ButtonGroup>
-            {currentConfig.buttons.map((button, index) => (
+      <HeaderContainer layout={currentConfig.layout}>
+        <Title>{currentConfig.title}</Title>
+        <ButtonGroup>
+          {currentConfig.buttons.map((button, index) =>
+            button.action ? ( // 버튼에 action이 있으면 onClick 연결
+              <Button key={index} onClick={button.action}>
+                {button.label}
+              </Button>
+            ) : (
               <Button key={index}>
                 <StyledLink to={button.path}>{button.label}</StyledLink>
               </Button>
-            ))}
-          </ButtonGroup>
-        </HeaderContainer>
-      );
+            )
+          )}
+        </ButtonGroup>
+      </HeaderContainer>
+    );
 };
 
 export default Header;
