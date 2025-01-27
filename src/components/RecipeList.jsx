@@ -2,15 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import RecipeCard from "./RecipeCard.jsx";
 
-const RecipeList = ({ recipes, onToggleFavorite, favoriteRecipes }) => {
+const RecipeList = ({ recipes }) => {
     return (
       <ListContainer>
-        {recipes.map((recipe) => (
+        {recipes.map((recipe,index) => (
           <RecipeCard
-            key={recipe.id}
+            key={index}
             recipe={recipe}
-            isFavorite={favoriteRecipes.some((fav) => fav.id === recipe.id)}
-            onToggleFavorite={onToggleFavorite}
           />
         ))}
       </ListContainer>

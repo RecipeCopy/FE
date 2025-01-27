@@ -4,25 +4,26 @@ import RecipeList from "../components/RecipeList";
 import Header from "../components/Header";
 import { fetchRecipes } from "../../api";
 
-const AllRecipePage = ({ favoriteRecipes, onToggleFavorite })=>{
+const AllRecipePage = ()=>{
 
     const [recipes, setRecipes] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchAllRecipes= async () => {
+        const getRecipes = async () => {
+            setLoading(true);
           try {
             const data = await fetchRecipes();
             setRecipes(data);
           } catch (err) {
-            setError(err);
+            setError(err.Message);
           } finally {
             setLoading(false);
           }
         };
     
-        fetchAllRecipes();
+        getRecipes();
       }, []);
 
       
@@ -31,12 +32,8 @@ const AllRecipePage = ({ favoriteRecipes, onToggleFavorite })=>{
     
       return (
         <PageContainer>
-          <Header />
-          <RecipeList
-            recipes={recipes}
-            favoriteRecipes={favoriteRecipes}
-            onToggleFavorite={onToggleFavorite}
-          />
+            <Header />
+            <RecipeList recipes={recipes} />
         </PageContainer>
     );
 };
