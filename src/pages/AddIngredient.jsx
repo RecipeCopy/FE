@@ -2,11 +2,15 @@ import React, {useState} from "react";
 import styled from "styled-components";
 import IngredientData from "../components/Ingredients.jsx";
 import Header from "../components/Header.jsx";
+import {  useNavigate } from "react-router-dom";
 
 
-const AddIngredient = ()=>{
+const AddIngredient = ({ ingredients, setIngredients })=>{
+     
      const [selectedIngredients, setSelectedIngredients] = useState([]);
      const [searchTerm, setSearchTerm] = useState(); 
+     const navigate = useNavigate();
+
 
      const toggleIngredient = (ingredient) =>{ 
         if(selectedIngredients.includes(ingredient)){
@@ -25,9 +29,16 @@ const AddIngredient = ()=>{
       };
 
 
-     const handleAddToFridge = () =>{
-        console.log("추가된 재료", selectedIngredients);
-     }
+      const handleAddToFridge = () => {
+        const newIngredients = selectedIngredients.map((ingredientName) => {
+          const ingredientData = IngredientData.find(
+            (item) => item.name === ingredientName
+          );
+          return { name: ingredientData.name, img: ingredientData.img };
+        });
+        setIngredients([...ingredients, ...newIngredients]);
+        navigate("/fridge");
+      };
 
      const filteredIngredients = searchTerm
         ? IngredientData.filter((ingredient)=>
