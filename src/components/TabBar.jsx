@@ -1,13 +1,20 @@
 import React from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 const TabBar = () =>{
     const [activeTab, setActiveTab] = useState("냉장고");
+    const navigate = useNavigate();
+
+    const handleTabClick = (tabName, path)=>{
+      setActiveTab(tabName);
+      navigate(path);
+    };
 
     return (
         <TabBarContainer>
-      <TabItem onClick={() => setActiveTab("냉장고")}>
+        <TabItem onClick={() => handleTabClick("냉장고","/main")}>
         <img
           src={
             activeTab === "냉장고"
@@ -18,7 +25,7 @@ const TabBar = () =>{
         />
         <span>나의 냉장고</span>
       </TabItem>
-      <TabItem onClick={() => setActiveTab("레시피")}>
+      <TabItem onClick={() => handleTabClick("레시피","/all-recipes")}>
         <img
           src={
             activeTab === "레시피"
@@ -27,9 +34,9 @@ const TabBar = () =>{
           }
           alt="레시피 아이콘"
         />
-        <span>모든 레시피</span>
+        <span>모든 레시피</span> 
       </TabItem>
-      <TabItem onClick={() => setActiveTab("즐겨찾기")}>
+      <TabItem onClick={() => handleTabClick("즐겨찾기","/favorites")}>
         <img
           src={
             activeTab === "즐겨찾기"

@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import styled from "styled-components";
 import IngredientData from "../components/Ingredients.jsx";
+import Header from "../components/Header.jsx";
 import SearchBar from "../components/SearchBar.jsx";
 
 const AddIngredient = ()=>{
@@ -36,9 +37,7 @@ const AddIngredient = ()=>{
 
         return (
             <PageContainer>
-              <Header>
-                <Title>재료 추가하기</Title>
-              </Header>
+              <Header />
               <SearchContainer>
                 <SearchInput
                   type="text"
@@ -88,30 +87,15 @@ const AddIngredient = ()=>{
 export default AddIngredient;
 
 const PageContainer = styled.div`
+  width:100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
   background-color: #f8f8f8;
-  min-height: 100vh;
 `;
 
-const Header = styled.div`
-  width: 100%;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: white;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-`;
 
-const Title = styled.h1`
-  font-size: 18px;
-  font-weight: bold;
-`;
 
 const SearchContainer = styled.div`
 display: flex;
