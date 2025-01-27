@@ -1,12 +1,13 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import {FiX} from "react-icons/fi";
+
 
 const Header = ({onAddClick}) => {
     const location = useLocation();
+    const navigate = useNavigate();
 
-    console.log("Current Path:", location.pathname);
-   
     const headerConfig = {
         "/main":{
             title:"나의 냉장고",
@@ -19,14 +20,14 @@ const Header = ({onAddClick}) => {
         "/add" : {
             title:"재료 추가하기",
             buttons : [
-                {label:"뒤로가기",path:"/main"}],
+                {icon:<FiX />, action : ()=> navigate(-1)}],
                 layout: "center",
             
         },
         "/recommned":{
             title:"냉장고 파먹기",
             buttons:[{
-                label:"뒤로가기",path:"/main"}],
+                icon:<FiX />,action : () => navigate(-1)}],
                 layout: "center",
         },
         default :{
@@ -41,22 +42,29 @@ const Header = ({onAddClick}) => {
 
     return (
       <HeaderContainer layout={currentConfig.layout}>
-        <Title>{currentConfig.title}</Title>
-        <ButtonGroup>
-          {currentConfig.buttons.map((button, index) =>
-            button.action ? ( // 버튼에 action이 있으면 onClick 연결
-              <Button key={index} onClick={button.action}>
-                {button.label}
-              </Button>
-            ) : (
-              <Button key={index}>
-                <StyledLink to={button.path}>{button.label}</StyledLink>
-              </Button>
-            )
+          {currentConfig.layout === "center" && currentConfig.buttons.length > 0 && (
+              <BackButton onClick={currentConfig.buttons[0].action}>
+                  {currentConfig.buttons[0].icon}
+              </BackButton>
           )}
-        </ButtonGroup>
+          <Title layout={currentConfig.layout}>{currentConfig.title}</Title>
+          {currentConfig.layout !== "center" && (
+              <ButtonGroup>
+                  {currentConfig.buttons.map((button, index) =>
+                      button.path ? (
+                          <Button key={index}>
+                              <StyledLink to={button.path}>{button.label}</StyledLink>
+                          </Button>
+                      ) : (
+                          <Button key={index} onClick={button.action}>
+                              {button.icon || button.label}
+                          </Button>
+                      )
+                  )}
+              </ButtonGroup>
+          )}
       </HeaderContainer>
-    );
+  );
 };
 
 export default Header;
@@ -67,8 +75,6 @@ const HeaderContainer = styled.header`
     props.layout === "center" ? "center" : "space-between"};
   align-items: center;
   padding: 12px 16px;
-  background-color: white;
-  border-bottom: 1px solid #e0e0e0;
 `;
 
 const Title = styled.h1`
@@ -96,6 +102,20 @@ const Button = styled.div`
 const StyledLink = styled(Link)`
   text-decoration: none;
   color: inherit;
+
+  &:hover {
+    color: #717171;
+  }
+`;
+
+const BackButton = styled.button`
+  position: absolute;
+  left: 50px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #333;
+  cursor: pointer;
 
   &:hover {
     color: #717171;
