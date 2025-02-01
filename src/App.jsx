@@ -14,6 +14,7 @@ import RecipeRecommendation from "./pages/RecipeRecommendation.jsx";
 
 function App() {
   const [ingredients, setIngredients] = useState([]); 
+  const [favoriteRecipes, setFavoriteRecipes] = useState([]);
 
   const router = createBrowserRouter([
     {
@@ -69,7 +70,7 @@ function App() {
         },
         {
           path: "favorites",
-          element: <FavoritePage />,
+          element: <FavoritePage favoriteRecipes={favoriteRecipes} />,
         },
         {
           path: "recommend",

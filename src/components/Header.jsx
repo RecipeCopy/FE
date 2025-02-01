@@ -114,11 +114,18 @@ const Header = ({ onAddClick }) => {
       buttons: [{ label: "편집하기" }, { label: "설정" }],
       layout: "space-between",
     },
+    "/favorites": {
+      title:"즐겨찾기",
+      buttons:[
+        {label:"의견보내기",path:"/feedback"}],
+        layout:"space-between",
+    },  
     default: {
       title: "냉장고 레시피",
       buttons: [],
       layout: "space-between",
     },
+    
   };
 
   const currentConfig = headerConfig[location.pathname] || headerConfig.default;
