@@ -2,7 +2,8 @@ import React, {useEffect, useState} from "react";
 import styled from "styled-components";
 import RecipeList from "../components/RecipeList";
 import Header from "../components/Header";
-import { fetchRecipes } from "../../api";
+import TabBar from "../components/TabBar";
+import axios from "axios";
 
 const AllRecipePage = ()=>{
 
@@ -11,20 +12,22 @@ const AllRecipePage = ()=>{
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const getRecipes = async () => {
-            setLoading(true);
-          try {
-            const data = await fetchRecipes();
-            setRecipes(data);
-          } catch (err) {
-            setError(err.Message);
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        getRecipes();
-      }, []);
+      const fetchRecipes = async () => {
+        setLoading(true);
+        try {
+          const response = await axios.get("http://localhost:8080/api/recipes"); 
+          console.log("레시피 데이터:", response.data); 
+          setRecipes(response.data);
+        } catch (err) {
+          console.error("레시피 불러오기 실패!", err);
+          setError(err.response ? err.response.data : "서버 오류");
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchRecipes();
+    }, []);
 
       
       if (loading) return <Message>로딩 중입니다...</Message>;
@@ -34,6 +37,7 @@ const AllRecipePage = ()=>{
         <PageContainer>
             <Header />
             <RecipeList recipes={recipes} />
+            <TabBar />
         </PageContainer>
     );
 };

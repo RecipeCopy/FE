@@ -10,6 +10,7 @@ import SignUp from "./pages/Signup.jsx";
 import AllRecipePage from "./pages/AllRecipePage.jsx";
 import FavoritePage from "./pages/FavoritePage.jsx";
 import MyFridge from "./pages/MyFridge.jsx";
+import RecipeRecommendation from "./pages/RecipeRecommendation.jsx";
 
 function App() {
   const [ingredients, setIngredients] = useState([]); 
@@ -69,6 +70,10 @@ function App() {
         {
           path: "favorites",
           element: <FavoritePage />,
+        },
+        {
+          path: "recommend",
+          element : <RecipeRecommendation />
         },
       ],
     },

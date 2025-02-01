@@ -20,6 +20,31 @@ const Header = ({ onAddClick }) => {
   };
 
   useEffect(() => {
+    const fetchToken = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+  
+      if (code) {
+        try {
+          const response = await axios.get(`${API_BASE_URL}/callback?code=${code}`);
+          const { token, userId } = response.data;
+  
+          localStorage.setItem("token", token);
+          localStorage.setItem("userId", userId);
+  
+          navigate("/main");
+        } catch (error) {
+          console.error("로그인 중 오류 발생:", error);
+          alert("로그인에 실패했습니다.");
+        }
+      }
+    };
+  
+    fetchToken();
+  }, []);
+
+  
+  useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const response = await fetch("http://localhost:8080/api/user", {
