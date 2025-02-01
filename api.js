@@ -1,14 +1,20 @@
-const API_BASE_URL =  "http://localhost:8080";
+const API_BASE_URL = "http://localhost:8080";
 
-export const fetchRecipes = async ()=>  {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/recipes`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch recipes');
-      }
-      return await response.json(); 
-    } catch (error) {
-      console.error('Error fetching recipes:', error);
-      throw error; 
-    }
-  };
+const fetchRecipes = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token"); 
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}; 
+
+    const response = await axios.get("http://localhost:8080/api/recipes", { headers }); 
+    console.log("레시피 데이터:", response.data);
+    setRecipes(response.data);
+  } catch (err) {
+    console.error("레시피 불러오기 실패!", err);
+    setError(err.response ? err.response.data : "서버 오류");
+  } finally {
+    setLoading(false);
+  }
+};
+
+

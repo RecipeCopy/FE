@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Header from "../components/Header";
-import { fetchRecipes } from "../../api";
+import TabBar from "../components/TabBar";
+import axios from "axios";
+
 
 const API_BASE_URL = "http://localhost:8080";
 
@@ -9,7 +11,7 @@ const AllRecipePage = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // 🔍 검색어 상태 추가
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -29,7 +31,7 @@ const AllRecipePage = () => {
     fetchRecipes();
   }, []);
 
-  // 🔍 검색 기능: 검색어에 따라 필터링
+  
   const filteredRecipes = recipes.filter((recipe) =>
     recipe.recipeName.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -55,7 +57,7 @@ const AllRecipePage = () => {
 
 <RecipeList>
   {filteredRecipes.map((recipe, index) => {
-    // 🔍 ingredients가 문자열이면 배열로 변환
+    
     const ingredientsArray = Array.isArray(recipe.ingredients)
       ? recipe.ingredients
       : recipe.ingredients ? recipe.ingredients.split(",") : [];

@@ -1,104 +1,182 @@
-import React, {useState} from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import IngredientData from "../components/Ingredients.jsx";
 import Header from "../components/Header.jsx";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
+const API_BASE_URL = "http://localhost:8080";
 
-const AddIngredient = ({ ingredients, setIngredients })=>{
-     
-     const [selectedIngredients, setSelectedIngredients] = useState([]);
-     const [searchTerm, setSearchTerm] = useState(); 
-     const navigate = useNavigate();
+const AddIngredient = ({ setIngredients }) => {
+  const [availableIngredients, setAvailableIngredients] = useState([]); // 전체 재료 목록
+  const [selectedIngredients, setSelectedIngredients] = useState([]); // 선택된 재료
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState(null);
 
-
-     const toggleIngredient = (ingredient) =>{ 
-        if(selectedIngredients.includes(ingredient)){
-            setSelectedIngredients(
-                selectedIngredients.filter((item)=> item !== ingredient)
-            );
-        }else {
-            setSelectedIngredients([...selectedIngredients,ingredient]);
+ 
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("로그인이 필요합니다! 로그인 페이지로 이동합니다.");
+          navigate("/");
+          return;
         }
-     };
 
-     const handleRemoveIngredient = (ingredient) => {
-        setSelectedIngredients(
-          selectedIngredients.filter((item) => item !== ingredient)
-        );
-      };
-
-
-      const handleAddToFridge = () => {
-        const newIngredients = selectedIngredients.map((ingredientName) => {
-          const ingredientData = IngredientData.find(
-            (item) => item.name === ingredientName
-          );
-          return { name: ingredientData.name, img: ingredientData.img };
+        const response = await axios.get(`${API_BASE_URL}/api/user`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setIngredients([...ingredients, ...newIngredients]);
-        navigate("/fridge");
+
+        if (response.status === 200) {
+          localStorage.setItem("userId", response.data.userId);
+          setUserId(response.data.userId); 
+        }
+      } catch (err) {
+        console.error("사용자 정보를 가져오는 데 실패했습니다.", err);
+        alert("로그인이 필요합니다!");
+        navigate("/");
+      }
+    };
+
+    fetchUserInfo();
+  }, [navigate]);
+
+
+  useEffect(() => {
+    const fetchIngredientsList = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/ingredients/list`);
+        setAvailableIngredients(response.data);
+      } catch (error) {
+        console.error("고정 재료 목록 불러오기 실패:", error);
+        alert("재료 목록을 불러오지 못했습니다.");
+      }
+    };
+
+    fetchIngredientsList();
+  }, []);
+
+ 
+  const toggleIngredient = (ingredient) => {
+    if (selectedIngredients.includes(ingredient)) {
+      setSelectedIngredients(selectedIngredients.filter((item) => item !== ingredient));
+    } else {
+      setSelectedIngredients([...selectedIngredients, ingredient]);
+    }
+  };
+
+  const handleRemoveIngredient = (ingredient) => {
+    setSelectedIngredients(selectedIngredients.filter((item) => item !== ingredient));
+  };
+
+
+  const handleAddToFridge = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("사용자 정보를 불러오지 못했습니다. 다시 로그인해주세요.");
+      return;
+    }
+
+    if (selectedIngredients.length === 0) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("로그인이 필요합니다! 로그인 페이지로 이동합니다.");
+        navigate("/");
+        return;
+      }
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       };
 
-     const filteredIngredients = searchTerm
-        ? IngredientData.filter((ingredient)=>
-            ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-        : IngredientData;
+      // API에 보내야 할 데이터 형식으로 변환
+      const ingredientsPayload = selectedIngredients.map((ingredient) => ({
+        name: ingredient, 
+      }));
 
-        return (
-            <PageContainer>
-              <Header />
-              <SearchContainer>
-                <SearchInput
-                  type="text"
-                  placeholder="재료명을 검색해보세요"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <SearchIcon>🔍</SearchIcon>
-              </SearchContainer>
-              <IngredientsGrid>
-                {filteredIngredients.map((ingredient) => (
-                  <IngredientCard
-                    key={ingredient.id}
-                    selected={selectedIngredients.includes(ingredient.name)}
-                    onClick={() => toggleIngredient(ingredient.name)}
-                  >
-                    <IngredientImage src={ingredient.img} alt={ingredient.name} />
-                    <IngredientName>{ingredient.name}</IngredientName>
-                  </IngredientCard>
-                ))}
-              </IngredientsGrid>
-              {selectedIngredients.length > 0 && (
-                    <SelectedIngredientsContainer>
-                    {selectedIngredients.map((ingredient) => (
-                        <IngredientPill
-                        key={ingredient}
-                        onClick={() => handleRemoveIngredient(ingredient)}
-                        >
-                        {ingredient} ✕
-                        </IngredientPill>
-                    ))}
-                    </SelectedIngredientsContainer>
-                )}
-              <AddButton
-                onClick={handleAddToFridge}
-                disabled={selectedIngredients.length === 0}
-              >
-                {selectedIngredients.length === 0
-                  ? "재료를 선택해보세요"
-                  : `재료 추가하기 ${selectedIngredients.length}개`}
-              </AddButton>
-            </PageContainer>
-          );
-    
-}
+      const response = await axios.post(
+        `${API_BASE_URL}/api/fridge/add`,
+        { userId, ingredients: ingredientsPayload },
+        { headers }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        console.log("재료 추가 성공!", response.data);
+
+        
+        const updatedFridge = await axios.get(`${API_BASE_URL}/api/fridge/${userId}`, {
+          headers,
+        });
+        setIngredients(updatedFridge.data); // MyFridge.jsx에 전달
+
+        navigate("/fridge"); // 성공하면 나의 냉장고 페이지로 이동
+      } else {
+        throw new Error("서버 응답 실패");
+      }
+    } catch (error) {
+      console.error("냉장고 재료 추가 실패:", error);
+      alert("재료 추가에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+
+  const filteredIngredients = searchTerm
+    ? availableIngredients.filter((ingredient) =>
+        ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : availableIngredients;
+
+  return (
+    <PageContainer>
+      <Header />
+      <SearchContainer>
+        <SearchInput
+          type="text"
+          placeholder="재료명을 검색해보세요"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <SearchIcon>🔍</SearchIcon>
+      </SearchContainer>
+
+      <IngredientsGrid>
+        {filteredIngredients.map((ingredient) => (
+          <IngredientCard
+            key={ingredient.id}
+            selected={selectedIngredients.includes(ingredient.name)}
+            onClick={() => toggleIngredient(ingredient.name)}
+          >
+            <IngredientImage src={ingredient.img} alt={ingredient.name} />
+            <IngredientName>{ingredient.name}</IngredientName>
+          </IngredientCard>
+        ))}
+      </IngredientsGrid>
+
+      {selectedIngredients.length > 0 && (
+        <SelectedIngredientsContainer>
+          {selectedIngredients.map((ingredient) => (
+            <IngredientPill key={ingredient} onClick={() => handleRemoveIngredient(ingredient)}>
+              {ingredient} ✕
+            </IngredientPill>
+          ))}
+        </SelectedIngredientsContainer>
+      )}
+
+      <AddButton onClick={handleAddToFridge} disabled={selectedIngredients.length === 0}>
+        {selectedIngredients.length === 0 ? "재료를 선택해보세요" : `재료 추가하기 ${selectedIngredients.length}개`}
+      </AddButton>
+    </PageContainer>
+  );
+};
 
 export default AddIngredient;
 
 const PageContainer = styled.div`
-  width:100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -106,13 +184,11 @@ const PageContainer = styled.div`
   background-color: #f8f8f8;
 `;
 
-
-
 const SearchContainer = styled.div`
-display: flex;
-align-items: center;
-margin: 10px 0;
-width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  width: 100%;
 `;
 
 const SearchInput = styled.input`
@@ -131,36 +207,11 @@ const SearchIcon = styled.div`
   cursor: pointer;
 `;
 
-
 const IngredientsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin-top: 20px;
-`;
-
-const IngredientCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  background-color: ${(props) => (props.selected ? "#ffe0e0" : "#ffffff")};
-  border: ${(props) => (props.selected ? "1px solid #ff6b6b" : "1px solid #ddd")};
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.2s, border 0.2s;
-`;
-
-const IngredientImage = styled.img`
-  width: 50px;
-  height: 50px;
-  margin-bottom: 10px;
-`;
-
-const IngredientName = styled.p`
-  font-size: 10px;
-  color: #333;
 `;
 
 const AddButton = styled.button`
@@ -180,23 +231,4 @@ const AddButton = styled.button`
   &:hover {
     background-color: ${(props) => (props.disabled ? "#FCA5A5" : "#ff5252")};
   }
-`;
-
-
-const SelectedIngredientsContainer = styled.div`
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  width: 100%;
-`;
-
-const IngredientPill = styled.div`
-  padding: 5px 10px;
-  background-color: #FEE8EF;
-  border:1px solid #ff5252;
-  color: #333;
-  border-radius: 15px;
-  font-size: 10px;
-
 `;
