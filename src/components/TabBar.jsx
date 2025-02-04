@@ -1,56 +1,49 @@
 import React from "react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
-const TabBar = () =>{
-    const [activeTab, setActiveTab] = useState("냉장고");
-    const navigate = useNavigate();
+const TabBar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const handleTabClick = (tabName, path)=>{
-      setActiveTab(tabName);
-      navigate(path);
-    };
+  // 현재 경로에 따라 activeTab 설정
+  const activeTab = () => {
+    if (location.pathname === "/main") return "냉장고";
+    if (location.pathname === "/all-recipes") return "레시피";
+    if (location.pathname === "/favorites") return "즐겨찾기";
+    return "";
+  };
 
-    return (
-        <TabBarContainer>
-        <TabItem onClick={() => handleTabClick("냉장고","/main")}>
+  const handleTabClick = (tabName, path) => {
+    navigate(path);
+  };
+
+  return (
+    <TabBarContainer>
+      <TabItem onClick={() => handleTabClick("냉장고", "/main")}>
         <img
-          src={
-            activeTab === "냉장고"
-              ? "/선택된냉장고.png"
-              : "/냉장고.png"
-          }
+          src={activeTab() === "냉장고" ? "/선택된냉장고.png" : "/냉장고.png"}
           alt="냉장고 아이콘"
         />
         <span>나의 냉장고</span>
       </TabItem>
-      <TabItem onClick={() => handleTabClick("레시피","/all-recipes")}>
+      <TabItem onClick={() => handleTabClick("레시피", "/all-recipes")}>
         <img
-          src={
-            activeTab === "레시피"
-              ? "/선택된레시피.png"
-              : "/레시피.png"
-          }
+          src={activeTab() === "레시피" ? "/선택된레시피.png" : "/레시피.png"}
           alt="레시피 아이콘"
         />
-        <span>모든 레시피</span> 
+        <span>모든 레시피</span>
       </TabItem>
-      <TabItem onClick={() => handleTabClick("즐겨찾기","/favorites")}>
+      <TabItem onClick={() => handleTabClick("즐겨찾기", "/favorites")}>
         <img
-          src={
-            activeTab === "즐겨찾기"
-              ? "/선택된즐겨찾기.png"
-              : "/즐겨찾기.png"
-          }
+          src={activeTab() === "즐겨찾기" ? "/선택된즐겨찾기.png" : "/즐겨찾기.png"}
           alt="즐겨찾기 아이콘"
         />
         <span>즐겨찾기</span>
       </TabItem>
     </TabBarContainer>
-        
-    )
-}
+  );
+};
 
 export default TabBar;
 
