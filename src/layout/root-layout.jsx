@@ -16,7 +16,6 @@ const RootLayout = () => {
 export default RootLayout;
 
 const GlobalStyle = createGlobalStyle`
-  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
   * {
     margin: 0;
@@ -29,12 +28,14 @@ const GlobalStyle = createGlobalStyle`
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     background-color: #e3fff2;
   }
 `;
 
 const Container = styled.div`
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   width: 393px;
   min-height: 100vh;
   background-color: #FFFFFF;
