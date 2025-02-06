@@ -21,6 +21,9 @@ const Header = ({ onAddClick }) => {
   //   window.location.href = kakaoLoginUrl; // 카카오 인증 URL로 리다이렉트
   // };
 
+
+  // useEffect(() => {
+
   // useEffect(() => {
   //   const fetchToken = async () => {
   //     const urlParams = new URLSearchParams(window.location.search);
@@ -112,8 +115,9 @@ const Header = ({ onAddClick }) => {
         setIsLoggedIn(false);
         localStorage.removeItem("token"); // 잘못된 토큰 삭제
       }
-    };
 
+    };
+    
     const token = localStorage.getItem("token");
     if (token) {
       fetchUserInfo();
@@ -158,18 +162,11 @@ const Header = ({ onAddClick }) => {
       buttons: [{ label: "편집하기" }, { label: "설정" }],
       layout: "space-between",
     },
-    "/favorites": {
-      title:"즐겨찾기",
-      buttons:[
-        {label:"의견보내기",path:"/feedback"}],
-        layout:"space-between",
-    },  
     default: {
       title: "냉장고 레시피",
       buttons: [],
       layout: "space-between",
     },
-    
   };
 
   const currentConfig = headerConfig[location.pathname] || headerConfig.default;
@@ -194,12 +191,12 @@ const Header = ({ onAddClick }) => {
                 {button.icon || button.label}
               </Button>
             )
-          )}
-        </ButtonGroup>
-      )}
-    </HeaderContainer>
-  );
-};
+          )} </ButtonGroup>
+        )}
+      </HeaderContainer>
+    );
+  };
+  
 
 export default Header;
 
