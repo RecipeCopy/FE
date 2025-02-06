@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../components/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import CameraModal from "../components/CameraModal.jsx";
 
 const API_BASE_URL = "http://localhost:8080";
 
@@ -12,6 +13,8 @@ const AddIngredient = ({ setIngredients }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [userId, setUserId] = useState(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+ 
 
  
   useEffect(() => {
@@ -155,6 +158,8 @@ const AddIngredient = ({ setIngredients }) => {
           </IngredientCard>
         ))}
       </IngredientsGrid>
+
+      
 
       {selectedIngredients.length > 0 && (
         <SelectedIngredientsContainer>
