@@ -47,6 +47,8 @@ const Start = () => {
 
       <LinkButton to="/main">시작하기</LinkButton>
 
+      <LoginButton to="/login">로그인</LoginButton>
+
       <KakaoButton onClick={handleKakaoLogin}>
         <img src={Kakao} alt="Kakao Logo" />
         카카오로 계속하기
@@ -118,5 +120,14 @@ const KakaoButton = styled(LinkButton).attrs({ as: "button" })`
 
   &:hover {
     background-color: #ffd900;
+  }
+`;
+
+const LoginButton = styled(LinkButton)`
+  background-color: #4caf50;
+  color: #fff;
+
+  &:hover {
+    background-color: #45a049;
   }
 `;

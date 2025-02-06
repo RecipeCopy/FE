@@ -3,25 +3,48 @@ import Header from "../components/Header";
 import TabBar from "../components/TabBar";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import API from "../api/api";
 
 const Main = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [nickName, setNickName] = useState("사용자"); // 닉네임 기본값 설정
   const navigate = useNavigate();
 
-  // URL 파라미터 또는 sessionStorage에서 닉네임 가져오기
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const urlNickName = params.get("nickName");
+  //카카오 로그인(나중에 혹시 연결할수도 있으니까 지우지말아주세여 ㅎㅎㅎ)
+  // // URL 파라미터 또는 sessionStorage에서 닉네임 가져오기
+  // useEffect(() => {
+  //   const params = new URLSearchParams(location.search);
+  //   const urlNickName = params.get("nickName");
 
-    if (urlNickName) {
-      setNickName(urlNickName);
-      sessionStorage.setItem("nickName", urlNickName); // 닉네임 저장
-    } else {
-      const storedNickName = sessionStorage.getItem("nickName");
-      if (storedNickName) {
-        setNickName(storedNickName);
+  //   if (urlNickName) {
+  //     setNickName(urlNickName);
+  //     sessionStorage.setItem("nickName", urlNickName); // 닉네임 저장
+  //   } else {
+  //     const storedNickName = sessionStorage.getItem("nickName");
+  //     if (storedNickName) {
+  //       setNickName(storedNickName);
+  //     }
+  //   }
+  // }, []);
+
+  //로그인된 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await API.get("/user"); // ✅ 사용자 정보 가져오기
+        const { nickName } = response.data;
+        setNickName(nickName); // 닉네임 업데이트
+        localStorage.setItem("nickName", nickName); // ✅ localStorage에 저장
+      } catch (error) {
+        console.error("사용자 정보를 불러오는 중 오류 발생:", error);
       }
+    };
+
+    const storedNickName = localStorage.getItem("nickName");
+    if (storedNickName) {
+      setNickName(storedNickName);
+    } else {
+      fetchUserInfo();
     }
   }, []);
 

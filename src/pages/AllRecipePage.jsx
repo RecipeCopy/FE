@@ -1,88 +1,122 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { FaRegHeart, FaHeart } from "react-icons/fa"; 
 import Header from "../components/Header";
 import TabBar from "../components/TabBar";
-import axios from "axios";
-
-
-const API_BASE_URL = "http://localhost:8080";
+import API from "../api/api";
+import SearchBar from "../components/SearchBar";
 
 const AllRecipePage = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [favoriteRecipes, setFavoriteRecipes] = useState(new Set());
 
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/recipes`);
-        console.log("레시피 데이터:", response.data);
+        const response = await API.get("/recipes");
         setRecipes(response.data);
       } catch (err) {
-        console.error("레시피 불러오기 실패!", err);
         setError(err.response ? err.response.data : "서버 오류");
       } finally {
         setLoading(false);
       }
     };
 
+    const fetchFavorites = async () => {
+      try {
+        const response = await API.get("/scraps");
+        const favoriteSet = new Set(response.data.map((scrap) => scrap.recipeName)); // Set으로 변환
+        setFavoriteRecipes(favoriteSet);
+      } catch (err) {
+        console.error("즐겨찾기 데이터를 불러오는 중 오류 발생:", err);
+      }
+    };
+
     fetchRecipes();
+    fetchFavorites();
   }, []);
 
-  
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.recipeName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 스크랩 추가/삭제 기능
+  const toggleFavorite = async (recipeName) => {
+    const isFavorited = favoriteRecipes.has(recipeName);
+    try {
+      if (isFavorited) {
+        await API.delete(`/scraps/${recipeName}`);
+        setFavoriteRecipes((prev) => {
+          const updatedFavorites = new Set(prev);
+          updatedFavorites.delete(recipeName);
+          return updatedFavorites;
+        });
+      } else {
+        await API.post(`/scraps/${recipeName}`);
+        setFavoriteRecipes((prev) => {
+          const updatedFavorites = new Set(prev);
+          updatedFavorites.add(recipeName);
+          return updatedFavorites;
+        });
+      }
+    } catch (error) {
+      console.error("즐겨찾기 변경 중 오류 발생:", error);
+    }
+  };
 
   return (
-    <PageContainer>
+    <>
+      <PageContainer>
       <Header />
       <Content>
-        <SearchContainer>
-          <SearchInput
-            type="text"
-            placeholder="요리하고 싶은 재료를 검색해보세요"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </SearchContainer>
+        <SearchBar />
+        
 
         {loading && <Message>로딩 중입니다...</Message>}
         {error && <Message>데이터를 불러오지 못했습니다.</Message>}
-        {!loading && !error && filteredRecipes.length === 0 && (
+        {!loading && !error && recipes.length === 0 && (
           <Message>검색된 레시피가 없습니다.</Message>
         )}
 
-<RecipeList>
-  {filteredRecipes.map((recipe, index) => {
-    
-    const ingredientsArray = Array.isArray(recipe.ingredients)
-      ? recipe.ingredients
-      : recipe.ingredients ? recipe.ingredients.split(",") : [];
+        <RecipeList>
+          {recipes
+            .filter((recipe) => recipe.recipeName.toLowerCase().includes(searchTerm.toLowerCase()))
+            .map((recipe, index) => {
+              const ingredientsArray = Array.isArray(recipe.ingredients)
+                ? recipe.ingredients
+                : recipe.ingredients
+                ? recipe.ingredients.split(",")
+                : [];
 
-    return (
-      <RecipeCard key={index}>
-        <RecipeTitle>{recipe.recipeName}</RecipeTitle>
-        <IngredientList>
-          <span>필요한 재료: </span>
-          {ingredientsArray.slice(0, 3).join(", ")}... {/* 일부만 표시 */}
-        </IngredientList>
-        <RecipeInfo>재료 총 {ingredientsArray.length}개</RecipeInfo>
-      </RecipeCard>
-    );
-  })}
-</RecipeList>
+              const isFavorited = favoriteRecipes.has(recipe.recipeName);
 
+              return (
+                <RecipeCard key={index}>
+                  <RecipeHeader>
+                    <RecipeTitle>{recipe.recipeName}</RecipeTitle>
+                    <FavoriteIcon onClick={() => toggleFavorite(recipe.recipeName)}>
+                      {isFavorited ? <FaHeart color="red" /> : <FaRegHeart />}
+                    </FavoriteIcon>
+                  </RecipeHeader>
+                  <IngredientList>
+                    <span>필요한 재료: </span>
+                    {ingredientsArray.slice(0, 3).join(", ")}...
+                  </IngredientList>
+                  <RecipeInfo>재료 총 {ingredientsArray.length}개</RecipeInfo>
+                </RecipeCard>
+              );
+            })}
+        </RecipeList>
       </Content>
-      <TabBar />
     </PageContainer>
+    <TabBar />
+    </>
   );
 };
 
 export default AllRecipePage;
 
+// 스타일링
 const PageContainer = styled.div`
   padding: 16px;
   background-color: #f8f8f8;
@@ -91,23 +125,6 @@ const PageContainer = styled.div`
 
 const Content = styled.div`
   margin-top: 10px;
-`;
-
-const SearchContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border: none;
-  outline: none;
 `;
 
 const Message = styled.div`
@@ -131,6 +148,12 @@ const RecipeCard = styled.div`
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
+const RecipeHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 const RecipeTitle = styled.h3`
   margin: 0;
   font-size: 16px;
@@ -148,4 +171,14 @@ const RecipeInfo = styled.p`
   font-size: 12px;
   color: #888;
   margin: 0;
+`;
+
+const FavoriteIcon = styled.div`
+  cursor: pointer;
+  font-size: 20px;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 `;

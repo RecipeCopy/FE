@@ -3,64 +3,136 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {FiX} from "react-icons/fi";
+import API from "../api/api";
 
 
 const Header = ({ onAddClick }) => {
-  const CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
-  const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+  //카카오 로그인(나중에 혹시 연결할수도 있으니까 지우지말아주세여 ㅎㅎ)
+  // const CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
+  // const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
 
+  // const location = useLocation();
+  // const navigate = useNavigate();
+  // const [userName, setUserName] = useState(""); // 사용자 이름 상태
+  // const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
+
+  // const handleKakaoLogin = async () => {
+  //   const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
+  //   window.location.href = kakaoLoginUrl; // 카카오 인증 URL로 리다이렉트
+  // };
+
+
+  // useEffect(() => {
+
+  // useEffect(() => {
+  //   const fetchToken = async () => {
+  //     const urlParams = new URLSearchParams(window.location.search);
+  //     const code = urlParams.get("code");
+  
+  //     if (code) {
+  //       try {
+  //         const response = await axios.get(`${API_BASE_URL}/callback?code=${code}`);
+  //         const { token, userId } = response.data;
+  
+  //         localStorage.setItem("token", token);
+  //         localStorage.setItem("userId", userId);
+  
+  //         navigate("/main");
+  //       } catch (error) {
+  //         console.error("로그인 중 오류 발생:", error);
+  //         alert("로그인에 실패했습니다.");
+  //       }
+  //     }
+  //   };
+  
+  //   fetchToken();
+  // }, []);
+
+  
+  // useEffect(() => {
+  //   const fetchUserInfo = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:8080/api/user", {
+  //         method: "GET",
+  //         credentials: "include", // 세션 정보를 포함
+  //       });
+
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         setUserName(data.nickName);
+  //         setIsLoggedIn(true);
+  //       } else {
+  //         setIsLoggedIn(false);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user info:", error);
+  //       setIsLoggedIn(false);
+  //     }
+  //   };
+
+  //   fetchUserInfo();
+  // }, []);
+
+  // // 로그아웃
+  // const handleLogout = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:8080/api/logout", {
+  //       method: "POST",
+  //       credentials: "include", // 세션 정보를 포함
+  //     });
+
+  //     if (response.ok) {
+  //       // 스토리지 데이터 삭제
+  //       sessionStorage.clear(); // sessionStorage에 저장된 모든 항목 삭제
+  //       localStorage.removeItem("userName"); // 로컬스토리지 삭제
+
+  //       setIsLoggedIn(false);
+  //       setUserName("");
+  //       window.location.href = "/"; // 로그인 페이지로 리다이렉트
+  //     }
+  //   } catch (error) {
+  //     console.error("Error logging out:", error);
+  //   }
+  // };
+
+
+  //토큰 로그인
   const location = useLocation();
   const navigate = useNavigate();
   const [userName, setUserName] = useState(""); // 사용자 이름 상태
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
 
-  const handleKakaoLogin = async () => {
-    const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
-    window.location.href = kakaoLoginUrl; // 카카오 인증 URL로 리다이렉트
-  };
-
   useEffect(() => {
+    // 사용자 정보 가져오기
     const fetchUserInfo = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/user", {
-          method: "GET",
-          credentials: "include", // 세션 정보를 포함
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUserName(data.nickName);
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-        }
+        const response = await API.get("/user"); // API 사용
+        const { nickName } = response.data; // 서버에서 반환된 사용자 닉네임
+        setUserName(nickName);
+        setIsLoggedIn(true);
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        console.error("사용자 정보를 가져오는 중 오류 발생:", error);
         setIsLoggedIn(false);
+        localStorage.removeItem("token"); // 잘못된 토큰 삭제
       }
-    };fetchUserInfo();
+
+    };
+    
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchUserInfo();
+    }
   }, []);
 
   // 로그아웃
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("http://localhost:8080/api/logout", {
-        method: "POST",
-        credentials: "include", // 세션 정보를 포함
-      });
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
 
-      if (response.ok) {
-        // 스토리지 데이터 삭제
-        sessionStorage.clear(); // sessionStorage에 저장된 모든 항목 삭제
-        localStorage.removeItem("userName"); // 로컬스토리지 삭제
-
-        setIsLoggedIn(false);
-        setUserName("");
-        window.location.href = "/"; // 로그인 페이지로 리다이렉트
-      }
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+    setIsLoggedIn(false);
+    setUserName("");
+    navigate("/");
   };
 
   const headerConfig = {
@@ -68,7 +140,10 @@ const Header = ({ onAddClick }) => {
       title: "나의 냉장고",
       buttons: [
         { label: "추가하기", action: onAddClick },
-        { label: isLoggedIn ? "로그아웃" : "로그인", action: isLoggedIn ? handleLogout : handleKakaoLogin },
+        {
+          label: isLoggedIn ? "로그아웃" : "로그인",
+          action: isLoggedIn ? handleLogout : () => navigate("/"),
+        },
       ],
       layout: "space-between",
     },

@@ -6,11 +6,12 @@ import NotFound from "./pages/not-found.jsx";
 import MainPage from "./pages/Main.jsx";
 import StartPage from "./pages/Start.jsx";
 import AddIngredient from "./pages/AddIngredient.jsx";
-import SignUp from "./pages/Signup.jsx";
+import SignIn from "./pages/LoginForm.jsx";
 import AllRecipePage from "./pages/AllRecipePage.jsx";
 import FavoritePage from "./pages/FavoritePage.jsx";
 import MyFridge from "./pages/MyFridge.jsx";
 import RecipeRecommendation from "./pages/RecipeRecommendation.jsx";
+import SignUp from "./pages/SignupForm.jsx";
 
 function App() {
   const [ingredients, setIngredients] = useState([]); 
@@ -62,6 +63,10 @@ function App() {
         },
         {
           path: "login",
+          element: <SignIn />,
+        },
+        {
+          path: "signup",
           element: <SignUp />,
         },
         {
