@@ -4,6 +4,9 @@ import Header from "../components/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import CameraModal from "../components/CameraModal.jsx";
+import IngredientCard from "../components/IngredientCard.jsx";
+
+
 
 const API_BASE_URL = "http://localhost:8080";
 
@@ -11,12 +14,12 @@ const AddIngredient = ({ setIngredients }) => {
   const [availableIngredients, setAvailableIngredients] = useState([]); // 전체 재료 목록
   const [selectedIngredients, setSelectedIngredients] = useState([]); // 선택된 재료
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
   const [userId, setUserId] = useState(null);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
- 
+  
+  const navigate = useNavigate();
 
- 
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -33,7 +36,7 @@ const AddIngredient = ({ setIngredients }) => {
 
         if (response.status === 200) {
           localStorage.setItem("userId", response.data.userId);
-          setUserId(response.data.userId); 
+          setUserId(response.data.userId);
         }
       } catch (err) {
         console.error("사용자 정보를 가져오는 데 실패했습니다.", err);
@@ -45,12 +48,52 @@ const AddIngredient = ({ setIngredients }) => {
     fetchUserInfo();
   }, [navigate]);
 
+  // 냉 장고 데이터 불러오는 함수
+  const fetchFridgeIngredients = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate("/");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/fridge`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("냉장고에서 불러온 재료:", response.data);
+
+      
+      setIngredients(response.data.map(item => item.ingredientName));
+    } catch (error) {
+      console.error("냉장고 데이터 불러오기 실패:", error);
+    }
+  };
+
+  // 페이지 처음 렌더링 될 때 냉장고 데이터 불러오기기 
+  useEffect(() => {
+    fetchFridgeIngredients();
+  }, []);
 
   useEffect(() => {
     const fetchIngredientsList = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/ingredients/list`);
-        setAvailableIngredients(response.data);
+
+        if (!Array.isArray(response.data)) {
+          console.error("API 응답이 배열이 아닙니다:", response.data);
+          return;
+        }
+
+        setAvailableIngredients(
+          response.data.map((ingredient, index) => ({
+            id: index + 1,
+            name: ingredient,
+            img: `/images/${ingredient}.png`,
+          }))
+        );
       } catch (error) {
         console.error("고정 재료 목록 불러오기 실패:", error);
         alert("재료 목록을 불러오지 못했습니다.");
@@ -60,73 +103,56 @@ const AddIngredient = ({ setIngredients }) => {
     fetchIngredientsList();
   }, []);
 
- 
+  // 토글 
   const toggleIngredient = (ingredient) => {
-    if (selectedIngredients.includes(ingredient)) {
-      setSelectedIngredients(selectedIngredients.filter((item) => item !== ingredient));
+    if (selectedIngredients.some((item) => item.id === ingredient.id)) {
+      setSelectedIngredients(selectedIngredients.filter((item) => item.id !== ingredient.id));
     } else {
       setSelectedIngredients([...selectedIngredients, ingredient]);
     }
   };
 
+  // 삭제 
   const handleRemoveIngredient = (ingredient) => {
-    setSelectedIngredients(selectedIngredients.filter((item) => item !== ingredient));
+    setSelectedIngredients(selectedIngredients.filter((item) => item.id !== ingredient.id));
   };
 
-
+  // 재료 추가 후 최신 냉장고 데이터 불러오기
   const handleAddToFridge = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      alert("사용자 정보를 불러오지 못했습니다. 다시 로그인해주세요.");
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
       return;
     }
-
-    if (selectedIngredients.length === 0) return;
-
+  
+    const payload = {
+      ingredients: selectedIngredients.map((ingredient) => ingredient.name),
+    };
+  
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+  
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("로그인이 필요합니다! 로그인 페이지로 이동합니다.");
-        navigate("/");
-        return;
-      }
-
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-
-      // API에 보내야 할 데이터 형식으로 변환
-      const ingredientsPayload = selectedIngredients.map((ingredient) => ({
-        name: ingredient, 
-      }));
-
-      const response = await axios.post(
-        `${API_BASE_URL}/api/fridge/add`,
-        { userId, ingredients: ingredientsPayload },
-        { headers }
-      );
-
-      if (response.status === 200 || response.status === 201) {
-        console.log("재료 추가 성공!", response.data);
-
-        
-        const updatedFridge = await axios.get(`${API_BASE_URL}/api/fridge/${userId}`, {
-          headers,
-        });
-        setIngredients(updatedFridge.data); // MyFridge.jsx에 전달
-
-        navigate("/fridge"); // 성공하면 나의 냉장고 페이지로 이동
-      } else {
-        throw new Error("서버 응답 실패");
-      }
+      const response = await axios.post("http://localhost:8080/api/fridge/add", payload, { headers });
+  
+      console.log("재료 추가 성공!", response.data);
+  
+      // 추가한 후 최신 데이터를 반영하도록 main으로 이동할 때 state 전달
+      navigate("/main", { state: { refresh: true } });
+  
     } catch (error) {
-      console.error("냉장고 재료 추가 실패:", error);
+      console.error("재료 추가 실패:", error.response?.data || error);
       alert("재료 추가에 실패했습니다. 다시 시도해주세요.");
     }
   };
+  
 
-
+  
+ // 검색어로 필터링 
   const filteredIngredients = searchTerm
     ? availableIngredients.filter((ingredient) =>
         ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -136,6 +162,7 @@ const AddIngredient = ({ setIngredients }) => {
   return (
     <PageContainer>
       <Header />
+      
       <SearchContainer>
         <SearchInput
           type="text"
@@ -147,25 +174,21 @@ const AddIngredient = ({ setIngredients }) => {
       </SearchContainer>
 
       <IngredientsGrid>
-        {filteredIngredients.map((ingredient) => (
+        {filteredIngredients.map((ingredient, index) => (
           <IngredientCard
-            key={ingredient.id}
-            selected={selectedIngredients.includes(ingredient.name)}
-            onClick={() => toggleIngredient(ingredient.name)}
-          >
-            <IngredientImage src={ingredient.img} alt={ingredient.name} />
-            <IngredientName>{ingredient.name}</IngredientName>
-          </IngredientCard>
+            key={ingredient.id || index}
+            ingredient={ingredient}
+            selected={selectedIngredients.some((item) => item.id === ingredient.id)}
+            onClick={() => toggleIngredient(ingredient)}
+          />
         ))}
       </IngredientsGrid>
-
-      
 
       {selectedIngredients.length > 0 && (
         <SelectedIngredientsContainer>
           {selectedIngredients.map((ingredient) => (
-            <IngredientPill key={ingredient} onClick={() => handleRemoveIngredient(ingredient)}>
-              {ingredient} ✕
+            <IngredientPill key={ingredient.id} onClick={() => handleRemoveIngredient(ingredient)}>
+              {ingredient.name} ✕
             </IngredientPill>
           ))}
         </SelectedIngredientsContainer>
@@ -179,6 +202,7 @@ const AddIngredient = ({ setIngredients }) => {
 };
 
 export default AddIngredient;
+
 
 const PageContainer = styled.div`
   width: 100%;
@@ -219,6 +243,20 @@ const IngredientsGrid = styled.div`
   margin-top: 20px;
 `;
 
+const SelectedIngredientsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 100%;
+  max-width: 400px;
+`;
+
+
 const AddButton = styled.button`
   margin-top: 20px;
   padding: 15px 20px;
@@ -235,5 +273,23 @@ const AddButton = styled.button`
 
   &:hover {
     background-color: ${(props) => (props.disabled ? "#FCA5A5" : "#ff5252")};
+  }
+`;
+
+const IngredientPill = styled.div`
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin: 5px;
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #ff5252;
   }
 `;

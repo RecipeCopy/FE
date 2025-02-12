@@ -157,11 +157,6 @@ const Header = ({ onAddClick }) => {
       buttons: [{ icon: <FiX />, action: () => navigate(-1) }],
       layout: "center",
     },
-    "/fridge": {
-      title: "나의 냉장고",
-      buttons: [{ label: "편집하기" }, { label: "설정" }],
-      layout: "space-between",
-    },
     default: {
       title: "냉장고 레시피",
       buttons: [],

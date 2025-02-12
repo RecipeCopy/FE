@@ -9,7 +9,6 @@ import AddIngredient from "./pages/AddIngredient.jsx";
 import SignIn from "./pages/LoginForm.jsx";
 import AllRecipePage from "./pages/AllRecipePage.jsx";
 import FavoritePage from "./pages/FavoritePage.jsx";
-import MyFridge from "./pages/MyFridge.jsx";
 import RecipeRecommendation from "./pages/RecipeRecommendation.jsx";
 import SignUp from "./pages/SignupForm.jsx";
 
@@ -30,27 +29,11 @@ function App() {
         {
           path: "main",
           element: (
-            ingredients.length===0? (
             <MainPage 
             ingredients={ingredients} 
             setIngredients={setIngredients} 
             />
-            ) : (
-            <MyFridge
-              ingredients={ingredients}
-              setIngredients={setIngredients}
-            />
-            )
           ), 
-        },
-        {
-          path: "fridge",
-          element: (
-            <MyFridge
-              ingredients={ingredients}
-              setIngredients={setIngredients}
-            />
-          ),
         },
         {
           path: "add",
