@@ -152,7 +152,7 @@ const Header = ({ onAddClick }) => {
       buttons: [{ icon: <FiX />, action: () => navigate(-1) }],
       layout: "center",
     },
-    "/recommned": {
+    "/recommend": {
       title: "냉장고 파먹기",
       buttons: [{ icon: <FiX />, action: () => navigate(-1) }],
       layout: "center",

@@ -64,6 +64,7 @@ function App() {
           path: "recommend",
           element : <RecipeRecommendation />
         },
+      
       ],
     },
   ]);
