@@ -14,34 +14,49 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await API.post("/login", formData);
-        console.log("로그인 응답 데이터:", response.data); // 응답 전체 확인
+      const response = await API.post("/login", formData);
+      console.log("로그인 응답 데이터:", response.data);
 
-        if (!response.data.data) {
-            console.error("response.data.data가 없습니다!", response.data);
-            alert("서버 응답 오류 발생. 다시 시도해주세요.");
-            return;
-        }
+      if (!response.data.data) {
+        console.error("response.data.data가 없습니다!", response.data);
+        alert("서버 응답 오류 발생. 다시 시도해주세요.");
+        return;
+      }
 
-        const { token, userId } = response.data.data; //userId로 변경
-        console.log("받은 userId:", userId);
+      const { token } = response.data.data; // userId 대신 token만 받음
+      console.log("받은 토큰:", token);
 
-        if (!userId) {
-            console.error("로그인 응답에서 `userId`가 없습니다!", response.data.data);
-            alert("서버에서 ID 값을 반환하지 않습니다. 백엔드 API 확인 필요!");
-            return;
-        }
+      if (!token) {
+        console.error("로그인 응답에서 `token`이 없습니다!", response.data.data);
+        alert("서버에서 토큰 값을 반환하지 않습니다. 백엔드 API 확인 필요!");
+        return;
+      }
 
-        localStorage.setItem("token", token);
-        localStorage.setItem("userId", userId); // userId 저장 (id 대신)
-        alert("로그인 성공!");
-        navigate("/main");
+      // 2️⃣ 토큰 저장
+      localStorage.setItem("token", token);
+
+      // 3️⃣ 닉네임 조회 요청 (토큰을 헤더에 포함)
+      const userResponse = await API.get("/user", {
+        headers: { Authorization: `Bearer ${token}` }, //헤더에 토큰 추가
+      });
+
+      console.log("닉네임 조회 응답:", userResponse.data);
+      const { nickName } = userResponse.data;
+
+      if (nickName) {
+        localStorage.setItem("nickName", nickName); // 닉네임 저장
+      } else {
+        console.warn("닉네임을 가져오지 못했습니다.");
+      }
+
+      alert("로그인 성공!");
+      navigate("/main");
+
     } catch (error) {
-        console.error("로그인 실패:", error.response?.data || error);
-        alert("로그인 실패: " + (error.response?.data?.message || "서버 오류 발생"));
+      console.error("로그인 실패:", error.response?.data || error);
+      alert("로그인 실패: " + (error.response?.data?.message || "서버 오류 발생"));
     }
-};
-
+  };
 
   return (
     <Container>

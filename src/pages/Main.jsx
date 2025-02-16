@@ -49,15 +49,16 @@ const Main = () => {
     useEffect(() => {
       const fetchUserInfo = async () => {
         try {
-          const response = await API.get("/user"); //사용자 정보 가져오기
+          const response = await API.get("/user"); // 사용자 정보 가져오기
+          console.log("서버 응답:", response.data); // 서버 응답 데이터 확인
           const { nickName } = response.data;
-          setNickName(nickName); 
-          localStorage.setItem("nickName", nickName); //localStorage에 저장
+          setNickName(nickName);
+          localStorage.setItem("nickName", nickName);
         } catch (error) {
           console.error("사용자 정보를 불러오는 중 오류 발생:", error);
         }
       };
-  
+    
       const storedNickName = localStorage.getItem("nickName");
       if (storedNickName) {
         setNickName(storedNickName);
@@ -65,6 +66,7 @@ const Main = () => {
         fetchUserInfo();
       }
     }, []);
+    
  
 
   // 나의 냉장고 데이터 가져오기 

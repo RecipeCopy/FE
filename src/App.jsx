@@ -58,7 +58,7 @@ function App() {
         },
         {
           path: "favorites",
-          element: <FavoritePage favoriteRecipes={favoriteRecipes} />,
+          element: <FavoritePage/>,
         },
         {
           path: "recommend",
