@@ -5,7 +5,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import API from "../api/api";
 import axios from "axios"; 
-import Ingredients from "../components/Ingredients";
+import Ingredients from "../components/Ingredients"
+import RecipeRecommendationButton from "../components/buttons/RecipeRecommendationButton";
 
 
 const API_BASE_URL = "http://localhost:8080";
@@ -148,6 +149,7 @@ const handleTakePhoto = () => {
             <p>새로운 재료를 추가해보세요.</p>
           </EmptyFridgeWrapper>
         ) : (
+          <>
           <FridgeGrid>
             {fridgeIngredients.map((item, index) => (
               <IngredientCard key={index}>
@@ -162,6 +164,8 @@ const handleTakePhoto = () => {
               </IngredientCard>
             ))}
           </FridgeGrid>
+          <RecipeRecommendationButton fridgeIngredients={fridgeIngredients} /> 
+          </>
         )}
       </Content>
       <TabBar />
@@ -235,9 +239,7 @@ const FridgeGrid = styled.div`
 `;
 
 
-const IngredientCard = styled.div.withConfig({
-  shouldForwardProp: (prop) => prop !== "layout",
-})`
+const IngredientCard = styled.div`
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
