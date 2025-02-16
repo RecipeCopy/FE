@@ -66,11 +66,12 @@ const AllRecipePage = () => {
 
   return (
     <>
+      <Toparea>
+          <Header />
+          <SearchBar />
+      </Toparea>
       <PageContainer>
-      <Header />
-      <Content>
-        <SearchBar />
-        
+      <Content>        
 
         {loading && <Message>로딩 중입니다...</Message>}
         {error && <Message>데이터를 불러오지 못했습니다.</Message>}
@@ -181,4 +182,10 @@ const FavoriteIcon = styled.div`
   &:hover {
     transform: scale(1.1);
   }
+`;
+
+const Toparea = styled.div`
+  background-color: white;
+  margin: 0px;
+  padding: 0px;
 `;
