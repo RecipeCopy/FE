@@ -3,7 +3,6 @@ import styled from "styled-components";
 import Header from "../components/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import CameraModal from "../components/CameraModal.jsx";
 import IngredientCard from "../components/IngredientCard.jsx";
 
 

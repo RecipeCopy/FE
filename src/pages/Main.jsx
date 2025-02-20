@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import TabBar from "../components/TabBar";
+import CameraModal from "../components/CameraModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import API from "../api/api";
@@ -16,7 +17,7 @@ const Main = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [nickName, setNickName] = useState("사용자"); // 닉네임 기본값 설정
   const [fridgeIngredients, setFridgeIngredients] = useState([]); //냉장고 재료 상태
-
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation(); 
 
@@ -127,21 +128,29 @@ const formatDate = (dateString) => {
 // 카메라  
 const handleTakePhoto = () => {
   console.log("카메라 연결 실행");
+  setIsCameraOpen(true);
 };
 
 
   return (
     <>
       <Header onAddClick={() => setIsMenuOpen(!isMenuOpen)} />
-      {isMenuOpen && (
+
+      {!isCameraOpen && isMenuOpen && (
         <MenuContainer>
           <MenuButton onClick={handleAddIngredient}>
             ➕ 재료 추가하기
           </MenuButton>
-          <MenuButton onClick={handleTakePhoto}>
+          <MenuButton onClick={()=> setIsCameraOpen(true)}>
             ➕ 재료 사진찍기
           </MenuButton>
         </MenuContainer>
+      )}
+      {isCameraOpen && ( 
+        <CameraModal onClose= {()=> {
+          console.log("카메라 모달 닫기");
+          setIsCameraOpen(false);
+        }} />
       )}
       <Content>
         {fridgeIngredients.length === 0 ? (
