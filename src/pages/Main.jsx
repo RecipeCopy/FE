@@ -84,7 +84,6 @@ const Main = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
   
-      console.log("냉장고에서 불러온 재료:", response.data);
   
       //API 데이터에 이미지 추가
       const updatedData = response.data.map((item) => ({
@@ -126,9 +125,36 @@ const formatDate = (dateString) => {
 };
 
 // 카메라  
-const handleTakePhoto = () => {
-  console.log("카메라 연결 실행");
-  setIsCameraOpen(true);
+// const handleTakePhoto = () => {
+//   console.log("카메라 연결 실행");
+//   setIsCameraOpen(true);
+// };
+
+// 재료 삭제 함수 
+const handleDeleteIngredient = async (ingredientName) => {
+  const confirmDelete = window.confirm("해당 재료를 삭제하시겠습니까?");
+  if (!confirmDelete) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate("/");
+      return;
+    }
+
+    await axios.delete(`${API_BASE_URL}/api/fridge/delete/${ingredientName}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    alert("재료가 삭제되었습니다.");
+    // UI에서 삭제된 재료 제거
+    setFridgeIngredients(prev => prev.filter(item => item.ingredientName !== ingredientName));
+
+  } catch (error) {
+    console.error("재료 삭제 실패:", error);
+    alert("재료 삭제에 실패했습니다. 다시 시도해주세요.");
+  }
 };
 
 
@@ -164,6 +190,9 @@ const handleTakePhoto = () => {
           <FridgeGrid>
             {fridgeIngredients.map((item, index) => (
               <IngredientCard key={index}>
+                <DeleteButton onClick = {()=>handleDeleteIngredient(item.ingredientName)}>
+                ❌
+                </DeleteButton>
                 <IngredientImage
                   src={item.imageUrl ? item.imageUrl : "/기본재료이미지.png"}
                   alt={item.ingredientName}
@@ -257,7 +286,8 @@ const IngredientCard = styled.div`
   padding: 15px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
+  position:relative;
 `;
 
 
@@ -284,4 +314,20 @@ const IngredientName = styled.span`
 const AddedDate = styled.span`
   font-size: 12px;
   color: gray;
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: -5px;
+  right: 10px;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background: #ff5252;
+  }
 `;
